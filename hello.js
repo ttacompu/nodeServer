@@ -1,5 +1,6 @@
 const http = require('http');
 const fs = require('fs');
+const url = require('url');
 
 function make_error(err, msg){
     var e = new Error(msg);
@@ -130,11 +131,16 @@ function handle_get_album(req, res){
 function handle_incoming_request(req, res) {
     console.log(`INCOMING REQUEST : ${req.method} ${req.url} `);
 
-    if(req.url == '/albums.json'){
+    req.parsed_url = url.parse(req.url, true);
+    var core_url = req.parsed_url.pathname;
+
+    if(core_url  == '/albums.json'){
         handle_list_albums(req, res);
     }
-    else if(req.url.substr(0, 7) == '/albums' && req.url.substr(req.url.length-5)== '.json'){
+    else if(core_url.substr(0, 7) == '/albums' && core_url .substr(req.url.length-5)== '.json'){
         handle_get_album(req, res);
+    }else{
+        send_failure(res, 404, invalid_resource());
     }
 
 }
